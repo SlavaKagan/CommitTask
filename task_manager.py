@@ -79,11 +79,52 @@ def get_overdue_tasks() -> list[dict]:
 
 
 def search_tasks_by_title(query: str) -> list[dict]:
-    """Search tasks by title (case-insensitive partial match)."""
-    if not query:
-        return []
-    query_lower = query.lower()
-    return [t for t in _tasks if query_lower in t["title"].lower()]
+    """
+    Search tasks by title (case-insensitive partial match).
+
+    Args:
+        query: The search string to match against task titles.
+
+    Returns:
+        A list of tasks whose titles contain the query string (case-insensitive).
+        Returns empty list if query is empty.
+
+    Raises:
+        TypeError: If query is not a string.
+        RuntimeError: If an unexpected error occurs during search.
+    """
+    try:
+        if not query:
+            return []
+        query_lower = query.lower()
+        return [t for t in _tasks if query_lower in t["title"].lower()]
+    except AttributeError as e:
+        raise TypeError(f"Query must be a string, got {type(query).__name__}") from e
+    except Exception as e:
+        raise RuntimeError(f"Error searching tasks by title '{query}': {e}") from e
+
+
+def get_task_by_id(task_id: int) -> Optional[dict]:
+    """
+    Retrieve a single task by its ID.
+
+    Args:
+        task_id: The ID of the task to retrieve.
+
+    Returns:
+        The task dictionary if found, None otherwise.
+
+    Raises:
+        TypeError: If task_id is not an integer.
+    """
+    try:
+        if not isinstance(task_id, int):
+            raise TypeError(f"task_id must be an integer, got {type(task_id).__name__}")
+        return next((t for t in _tasks if t["id"] == task_id), None)
+    except TypeError:
+        raise
+    except Exception as e:
+        raise RuntimeError(f"Error retrieving task with id={task_id}: {e}") from e
 
 
 # ── DEMO 5: Inline Chat adds try/except + docstring here ────────────────────
